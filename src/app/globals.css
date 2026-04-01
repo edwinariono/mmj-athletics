@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+@theme inline {
+  /* Colors */
+  --color-bg: #0a0a0a;
+  --color-surface: #111111;
+  --color-surface-light: #1a1a1a;
+  --color-border: #222222;
+  --color-border-light: #333333;
+  --color-ice-blue: #4fc3f7;
+  --color-ice-blue-hover: #39b0e6;
+  --color-mmj-red: #e53935;
+  --color-mmj-red-hover: #c62828;
+  --color-wa-green: #25d366;
+  --color-wa-green-hover: #1ebe5d;
+  --color-admin-bg: #0f1117;
+  --color-admin-surface: #161822;
+  --color-muted: #888888;
+
+  /* Fonts */
+  --font-heading: var(--font-heading);
+  --font-label: var(--font-label);
+  --font-body: var(--font-body);
+}
+
+/* Base styles */
+body {
+  background: var(--color-bg);
+  color: #ffffff;
+  font-family: var(--font-body), Arial, Helvetica, sans-serif;
+}
+
+/* Angular cut corner utility */
+.clip-corner-sm {
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+}
+
+.clip-corner-md {
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+}
+
+.clip-corner-lg {
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+}
+
+.clip-corner-tr {
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
+}
+
+/* Textured background */
+.bg-noise {
+  position: relative;
+}
+
+.bg-noise::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Stripe accent */
+.stripe-accent {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 4px,
+    rgba(79, 195, 247, 0.06) 4px,
+    rgba(79, 195, 247, 0.06) 8px
+  );
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #111111;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333333;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555555;
+}
