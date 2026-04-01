@@ -1,8 +1,24 @@
+import { createClient } from "@/lib/supabase/server";
 import { ProductCard } from "./ProductCard";
-import { mockProducts, mockCategories } from "@/lib/mock-data";
+import type { Product } from "@/lib/types";
 
-export function FeaturedProducts() {
-  const featured = mockProducts.slice(0, 4);
+export async function FeaturedProducts() {
+  let products: Product[] = [];
+
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("products")
+      .select("*, categories(name)")
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+      .limit(4);
+    if (data) products = data as Product[];
+  } catch {
+    // Fallback: no products shown
+  }
+
+  if (products.length === 0) return null;
 
   return (
     <section className="py-16 sm:py-20">
@@ -15,18 +31,13 @@ export function FeaturedProducts() {
         </p>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {featured.map((product) => {
-            const category = mockCategories.find(
-              (c) => c.id === product.category_id
-            );
-            return (
-              <ProductCard
-                key={product.id}
-                product={product}
-                categoryName={category?.name}
-              />
-            );
-          })}
+          {products.map((product: any) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              categoryName={product.categories?.name}
+            />
+          ))}
         </div>
       </div>
     </section>

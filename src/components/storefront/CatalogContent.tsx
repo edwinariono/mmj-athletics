@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Tabs } from "@/components/ui/Tabs";
 import { ProductCard } from "@/components/storefront/ProductCard";
-import { mockProducts, mockCategories } from "@/lib/mock-data";
+import type { Product } from "@/lib/types";
 
 const subFilters: Record<string, { id: string; label: string }[]> = {
   "helm-pelindung": [
@@ -31,16 +31,14 @@ const subFilters: Record<string, { id: string; label: string }[]> = {
   ],
 };
 
-export function CatalogContent({ category }: { category: string }) {
+interface CatalogContentProps {
+  category: string;
+  categoryName: string;
+  products: Product[];
+}
+
+export function CatalogContent({ category, categoryName, products }: CatalogContentProps) {
   const [activeFilter, setActiveFilter] = useState("all");
-
-  const categoryData = mockCategories.find((c) => c.slug === category);
-  const categoryName = categoryData?.name || "Katalog";
-  const categoryId = categoryData?.id;
-
-  const products = mockProducts.filter(
-    (p) => !categoryId || p.category_id === categoryId
-  );
 
   const filters = subFilters[category] || [{ id: "all", label: "Semua" }];
 

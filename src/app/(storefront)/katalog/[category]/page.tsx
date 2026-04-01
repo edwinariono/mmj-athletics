@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { createClient } from "@/lib/supabase/server";
 import { CatalogContent } from "@/components/storefront/CatalogContent";
 import { mockCategories } from "@/lib/mock-data";
+import type { Product } from "@/lib/types";
 
 const categoryMeta: Record<string, { title: string; description: string; keywords: string[] }> = {
   "helm-pelindung": {
@@ -67,5 +69,38 @@ export default async function CatalogPage({
   params: Promise<{ category: string }>;
 }) {
   const { category } = await params;
-  return <CatalogContent category={category} />;
+
+  let products: Product[] = [];
+  let categoryName = "Katalog";
+
+  try {
+    const supabase = await createClient();
+
+    // Get category
+    const { data: cat } = await supabase
+      .from("categories")
+      .select("id, name")
+      .eq("slug", category)
+      .single();
+
+    if (cat) {
+      categoryName = cat.name;
+
+      // Get products for this category
+      const { data: prods } = await supabase
+        .from("products")
+        .select("*")
+        .eq("category_id", cat.id)
+        .eq("status", "active")
+        .order("created_at", { ascending: false });
+
+      if (prods) products = prods as Product[];
+    }
+  } catch {
+    // Fallback to mock data
+    const categoryData = mockCategories.find((c) => c.slug === category);
+    if (categoryData) categoryName = categoryData.name;
+  }
+
+  return <CatalogContent category={category} categoryName={categoryName} products={products} />;
 }
