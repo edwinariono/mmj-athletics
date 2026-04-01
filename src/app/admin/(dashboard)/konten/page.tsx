@@ -309,7 +309,11 @@ export default function ContentPage() {
                 )}
               </div>
               <p className="text-xs text-muted/70 mt-2">
-                Ukuran rekomendasi: <strong>1920 x 640 px</strong> (rasio 3:1). Format: JPG, PNG, atau WebP. Maks 5MB.
+                Ukuran rekomendasi:{" "}
+                {form.position === "hero" && <strong>1920 x 640 px (rasio 3:1)</strong>}
+                {form.position === "promo" && <strong>1200 x 400 px (rasio 3:1)</strong>}
+                {form.position === "category" && <strong>1920 x 480 px (rasio 4:1)</strong>}
+                . Format: JPG, PNG, atau WebP. Maks 5MB.
               </p>
 
               <input

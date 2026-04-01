@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { CatalogContent } from "@/components/storefront/CatalogContent";
+import { CategoryBanner } from "@/components/storefront/CategoryBanner";
 import { mockCategories } from "@/lib/mock-data";
-import type { Product } from "@/lib/types";
+import type { Product, Banner } from "@/lib/types";
 
 const categoryMeta: Record<string, { title: string; description: string; keywords: string[] }> = {
   "helm-pelindung": {
@@ -72,6 +73,7 @@ export default async function CatalogPage({
 
   let products: Product[] = [];
   let categoryName = "Katalog";
+  let categoryBanner: Banner | null = null;
 
   try {
     const supabase = await createClient();
@@ -86,15 +88,26 @@ export default async function CatalogPage({
     if (cat) {
       categoryName = cat.name;
 
-      // Get products for this category
-      const { data: prods } = await supabase
-        .from("products")
-        .select("*")
-        .eq("category_id", cat.id)
-        .eq("status", "active")
-        .order("created_at", { ascending: false });
+      // Get products and category banner in parallel
+      const [prodsResult, bannerResult] = await Promise.all([
+        supabase
+          .from("products")
+          .select("*")
+          .eq("category_id", cat.id)
+          .eq("status", "active")
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("banners")
+          .select("*")
+          .eq("position", "category")
+          .eq("is_active", true)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .single(),
+      ]);
 
-      if (prods) products = prods as Product[];
+      if (prodsResult.data) products = prodsResult.data as Product[];
+      categoryBanner = bannerResult.data;
     }
   } catch {
     // Fallback to mock data
@@ -102,5 +115,10 @@ export default async function CatalogPage({
     if (categoryData) categoryName = categoryData.name;
   }
 
-  return <CatalogContent category={category} categoryName={categoryName} products={products} />;
+  return (
+    <>
+      <CategoryBanner banner={categoryBanner} />
+      <CatalogContent category={category} categoryName={categoryName} products={products} />
+    </>
+  );
 }
