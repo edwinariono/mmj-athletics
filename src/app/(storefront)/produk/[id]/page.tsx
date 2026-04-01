@@ -14,9 +14,28 @@ export async function generateMetadata({
   const { id } = await params;
   const product = mockProducts.find((p) => p.id === id);
   if (!product) return { title: "Produk Tidak Ditemukan" };
+  const category = mockCategories.find((c) => c.id === product.category_id);
   return {
-    title: `${product.name} — MMJ Athletics`,
-    description: product.description,
+    title: `${product.name} — ${product.brand} | Jual ${category?.name || "Peralatan"} Hoki Es`,
+    description: `${product.description} Hubungi via WhatsApp untuk info harga dan ketersediaan. ${product.brand} ${product.name} — available at MMJ Athletics Indonesia.`,
+    keywords: [
+      product.name,
+      product.brand,
+      `jual ${product.name}`,
+      `${product.brand} Indonesia`,
+      category?.name || "",
+      "hoki es",
+      "ice hockey",
+    ],
+    openGraph: {
+      title: `${product.name} — MMJ Athletics`,
+      description: product.description,
+      url: `https://mmjathletics.com/produk/${id}`,
+      images: product.images?.[0] ? [{ url: product.images[0] }] : undefined,
+    },
+    alternates: {
+      canonical: `https://mmjathletics.com/produk/${id}`,
+    },
   };
 }
 

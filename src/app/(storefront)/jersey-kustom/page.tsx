@@ -2,9 +2,28 @@ import type { Metadata } from "next";
 import { MessageCircle, Paintbrush, Users, Clock, Shirt, Award } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Jersey Kustom — MMJ Athletics",
+  title: "Jersey Hoki Es Kustom — Desain Jersey Tim | Custom Ice Hockey Jersey",
   description:
-    "Buat jersey tim hoki es kustom dengan sublimasi penuh. Desain sesuai identitas tim Anda. Minimal order 15+ set. Pengerjaan 2-3 minggu.",
+    "Buat jersey tim hoki es kustom dengan sublimasi penuh. Desain bebas sesuai identitas tim. Nama, nomor, patch kapten. Minimal order 15+ set. Pengerjaan 2-3 minggu. Custom ice hockey team jerseys Indonesia — full sublimation, free design.",
+  keywords: [
+    "jersey hoki es kustom",
+    "custom hockey jersey Indonesia",
+    "jersey tim hoki es",
+    "buat jersey hoki",
+    "sublimasi jersey hoki",
+    "ice hockey team jersey custom",
+    "desain jersey hoki es",
+    "order jersey hoki",
+  ],
+  openGraph: {
+    title: "Jersey Hoki Es Kustom — MMJ Athletics",
+    description:
+      "Buat jersey tim hoki es kustom dengan sublimasi penuh. Desain bebas, nama & nomor, minimal 15+ set.",
+    url: "https://mmjathletics.com/jersey-kustom",
+  },
+  alternates: {
+    canonical: "https://mmjathletics.com/jersey-kustom",
+  },
 };
 import { buildJerseyEnquiryLink } from "@/lib/whatsapp";
 import { JERSEY_COLORS } from "@/lib/constants";
