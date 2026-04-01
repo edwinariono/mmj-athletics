@@ -1,14 +1,22 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 import { BRANDS } from "@/lib/constants";
-import { mockCategories } from "@/lib/mock-data";
+import { createClient } from "@/lib/supabase/client";
 
 export default function NewProductPage() {
+  const router = useRouter();
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [images, setImages] = useState<string[]>([]);
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+  const [loaded, setLoaded] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     brand: "Bauer",
@@ -17,6 +25,48 @@ export default function NewProductPage() {
     status: "draft",
     specs: { Bahan: "", Ukuran: "", Berat: "", Sertifikasi: "" },
   });
+
+  // Load categories from Supabase
+  if (!loaded) {
+    setLoaded(true);
+    const supabase = createClient();
+    supabase
+      .from("categories")
+      .select("id, name")
+      .order("sort_order")
+      .then(({ data }) => {
+        if (data) setCategories(data);
+      });
+  }
+
+  async function handleSave() {
+    if (!formData.name || !formData.category_id) {
+      setError("Nama produk dan kategori wajib diisi");
+      return;
+    }
+
+    setSaving(true);
+    setError("");
+
+    const supabase = createClient();
+    const { error: insertError } = await supabase.from("products").insert({
+      name: formData.name,
+      brand: formData.brand,
+      category_id: formData.category_id,
+      description: formData.description,
+      status: formData.status,
+      specs: formData.specs,
+      images,
+    });
+
+    if (insertError) {
+      setError("Gagal menyimpan: " + insertError.message);
+      setSaving(false);
+      return;
+    }
+
+    router.push("/admin/produk");
+  }
 
   return (
     <div>
@@ -31,6 +81,12 @@ export default function NewProductPage() {
       <h1 className="font-heading text-2xl font-bold uppercase tracking-wider mb-6">
         Tambah Produk
       </h1>
+
+      {error && (
+        <div className="bg-mmj-red/10 border border-mmj-red/20 rounded-sm px-4 py-2.5 text-sm text-mmj-red mb-6">
+          {error}
+        </div>
+      )}
 
       <div className="max-w-2xl space-y-6">
         <div className="bg-admin-surface border border-border rounded-sm p-6 space-y-4">
@@ -73,7 +129,7 @@ export default function NewProductPage() {
                 }
               >
                 <option value="">Pilih kategori</option>
-                {mockCategories.map((c) => (
+                {categories.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
                   </option>
@@ -136,22 +192,22 @@ export default function NewProductPage() {
           </div>
         </div>
 
-        {/* Upload placeholder */}
-        <div className="bg-admin-surface border border-border rounded-sm p-6">
-          <h3 className="font-label font-semibold text-sm uppercase tracking-wider text-muted mb-4">
-            Foto Produk
-          </h3>
-          <div className="border-2 border-dashed border-border rounded-sm p-8 text-center">
-            <p className="text-sm text-muted">
-              Upload foto produk (akan tersedia setelah integrasi Supabase Storage)
-            </p>
-          </div>
-        </div>
+        {/* Image upload */}
+        <ImageUpload images={images} onImagesChange={setImages} />
 
         <div className="flex justify-end">
-          <Button size="lg">
-            <Save className="w-4 h-4" />
-            Simpan Produk
+          <Button size="lg" onClick={handleSave} disabled={saving}>
+            {saving ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Menyimpan...
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4" />
+                Simpan Produk
+              </>
+            )}
           </Button>
         </div>
       </div>
