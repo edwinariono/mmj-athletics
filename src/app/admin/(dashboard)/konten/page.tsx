@@ -300,7 +300,7 @@ export default function ContentPage() {
                     <span className="text-sm text-muted">Mengupload...</span>
                   </div>
                 ) : (
-                  <div className="flex items-center justify-center gap-2">
+                  <div className="flex flex-col items-center gap-2">
                     <Upload className="w-5 h-5 text-muted" />
                     <span className="text-sm text-muted">
                       {form.image_url ? "Ganti gambar" : "Upload gambar banner"}
@@ -308,6 +308,9 @@ export default function ContentPage() {
                   </div>
                 )}
               </div>
+              <p className="text-xs text-muted/70 mt-2">
+                Ukuran rekomendasi: <strong>1920 x 640 px</strong> (rasio 3:1). Format: JPG, PNG, atau WebP. Maks 5MB.
+              </p>
 
               <input
                 ref={fileInputRef}
