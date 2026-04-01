@@ -1,13 +1,34 @@
+import Image from "next/image";
 import Link from "next/link";
 import { MessageCircle, ChevronRight } from "lucide-react";
 import { buildGeneralEnquiryLink } from "@/lib/whatsapp";
+import type { Banner } from "@/lib/types";
 
-export function HeroSection() {
+interface HeroSectionProps {
+  banner?: Banner | null;
+}
+
+export function HeroSection({ banner }: HeroSectionProps) {
   return (
     <section className="relative overflow-hidden bg-bg">
+      {/* Background image from banner */}
+      {banner?.image_url && (
+        <Image
+          src={banner.image_url}
+          alt={banner.title || "Hero banner"}
+          fill
+          className="object-cover opacity-30"
+          priority
+        />
+      )}
+
       {/* Background texture */}
       <div className="absolute inset-0 stripe-accent" />
       <div className="absolute inset-0 bg-gradient-to-b from-ice-blue/5 via-transparent to-transparent" />
+      {/* Dark overlay for readability when image is present */}
+      {banner?.image_url && (
+        <div className="absolute inset-0 bg-gradient-to-r from-bg via-bg/80 to-transparent" />
+      )}
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-20 sm:py-28 lg:py-36">
         <div className="max-w-2xl">
@@ -15,7 +36,7 @@ export function HeroSection() {
           <div className="inline-flex items-center gap-2 bg-ice-blue/10 border border-ice-blue/20 px-3 py-1 mb-6 clip-corner-sm">
             <span className="w-1.5 h-1.5 bg-ice-blue rounded-full animate-pulse" />
             <span className="text-ice-blue font-label text-xs font-semibold uppercase tracking-wider">
-              Katalog Musim 2026
+              {banner?.title || "Katalog Musim 2026"}
             </span>
           </div>
 
@@ -29,8 +50,8 @@ export function HeroSection() {
 
           {/* Description */}
           <p className="text-muted text-base sm:text-lg leading-relaxed mb-8 max-w-lg">
-            Peralatan hoki es premium dari brand terpercaya dunia. Dealer resmi
-            Bauer & CCM di Indonesia. Jersey kustom untuk tim Anda.
+            {banner?.subtitle ||
+              "Peralatan hoki es premium dari brand terpercaya dunia. Dealer resmi Bauer & CCM di Indonesia. Jersey kustom untuk tim Anda."}
           </p>
 
           {/* CTAs */}
@@ -45,10 +66,10 @@ export function HeroSection() {
               Hubungi WhatsApp
             </a>
             <Link
-              href="/katalog/helm-pelindung"
+              href={banner?.cta_link || "/katalog/helm-pelindung"}
               className="inline-flex items-center gap-2 border border-white/30 hover:border-white hover:bg-white/5 text-white px-6 py-3.5 font-label font-semibold uppercase tracking-wider text-sm transition-all duration-200 clip-corner-sm"
             >
-              Lihat Katalog
+              {banner?.cta_text || "Lihat Katalog"}
               <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
