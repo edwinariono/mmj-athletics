@@ -43,7 +43,7 @@ export function ImageUpload({ images, onImagesChange }: ImageUploadProps) {
       const filePath = `products/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from("products")
+        .from("Product")
         .upload(filePath, file);
 
       if (uploadError) {
@@ -52,7 +52,7 @@ export function ImageUpload({ images, onImagesChange }: ImageUploadProps) {
       }
 
       const { data } = supabase.storage
-        .from("products")
+        .from("Product")
         .getPublicUrl(filePath);
 
       newImages.push(data.publicUrl);
@@ -72,10 +72,10 @@ export function ImageUpload({ images, onImagesChange }: ImageUploadProps) {
   async function handleRemove(imageUrl: string) {
     // Extract path from URL
     const url = new URL(imageUrl);
-    const pathParts = url.pathname.split("/storage/v1/object/public/products/");
+    const pathParts = url.pathname.split("/storage/v1/object/public/Product/");
     if (pathParts[1]) {
       const supabase = createClient();
-      await supabase.storage.from("products").remove([pathParts[1]]);
+      await supabase.storage.from("Product").remove([pathParts[1]]);
     }
     onImagesChange(images.filter((img) => img !== imageUrl));
   }

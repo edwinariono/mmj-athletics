@@ -86,7 +86,7 @@ export default function ContentPage() {
     const fileName = `banners/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
     const { error: uploadError } = await supabase.storage
-      .from("products")
+      .from("Product")
       .upload(fileName, file);
 
     if (uploadError) {
@@ -95,7 +95,7 @@ export default function ContentPage() {
       return;
     }
 
-    const { data } = supabase.storage.from("products").getPublicUrl(fileName);
+    const { data } = supabase.storage.from("Product").getPublicUrl(fileName);
     setForm({ ...form, image_url: data.publicUrl });
     setUploading(false);
 
