@@ -56,6 +56,7 @@ export default async function HomePage() {
       <JerseyPreview
         headline={texts.jersey_headline}
         description={texts.jersey_description}
+        mainImage={texts.jersey_main_image}
       />
       <FeaturedProducts />
       <WaCTABanner

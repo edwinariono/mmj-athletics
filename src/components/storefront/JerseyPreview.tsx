@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { MessageCircle, ChevronRight, Paintbrush, Users, Clock } from "lucide-react";
 import { buildJerseyEnquiryLink } from "@/lib/whatsapp";
@@ -6,22 +7,27 @@ import { JERSEY_COLORS } from "@/lib/constants";
 interface JerseyPreviewProps {
   headline?: string;
   description?: string;
+  mainImage?: string;
 }
 
-export function JerseyPreview({ headline, description }: JerseyPreviewProps) {
+export function JerseyPreview({ headline, description, mainImage }: JerseyPreviewProps) {
   return (
     <section className="py-16 sm:py-20 bg-surface border-y border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
           {/* Visual side */}
           <div className="relative">
-            <div className="aspect-[4/3] bg-bg border border-border clip-corner-lg flex items-center justify-center">
-              <div className="text-center">
-                <span className="font-heading text-6xl font-bold text-white/10">
-                  JERSEY
-                </span>
-                <p className="text-muted text-sm mt-2">Preview jersey kustom</p>
-              </div>
+            <div className="aspect-[4/3] bg-bg border border-border clip-corner-lg flex items-center justify-center relative overflow-hidden">
+              {mainImage ? (
+                <Image src={mainImage} alt="Jersey kustom" fill className="object-cover" />
+              ) : (
+                <div className="text-center">
+                  <span className="font-heading text-6xl font-bold text-white/10">
+                    JERSEY
+                  </span>
+                  <p className="text-muted text-sm mt-2">Preview jersey kustom</p>
+                </div>
+              )}
             </div>
             {/* Color swatches */}
             <div className="flex gap-2 mt-4">

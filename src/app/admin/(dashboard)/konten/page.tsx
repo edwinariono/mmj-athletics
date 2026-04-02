@@ -7,6 +7,7 @@ import {
   Save,
   Image,
   Type,
+  Shirt,
   Plus,
   Pencil,
   Trash2,
@@ -41,6 +42,184 @@ const emptyForm: BannerFormData = {
   position: "hero",
   is_active: true,
 };
+
+function JerseyGalleryEditor() {
+  const [images, setImages] = useState<string[]>([]);
+  const [mainImage, setMainImage] = useState("");
+  const [loadingJersey, setLoadingJersey] = useState(true);
+  const [uploadingJersey, setUploadingJersey] = useState(false);
+  const [savingJersey, setSavingJersey] = useState(false);
+  const [jerseySuccess, setJerseySuccess] = useState(false);
+  const jerseyFileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    async function load() {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from("site_settings")
+        .select("key, value")
+        .in("key", ["jersey_gallery", "jersey_main_image"]);
+      if (data) {
+        data.forEach((s: { key: string; value: string }) => {
+          if (s.key === "jersey_gallery") {
+            try { setImages(JSON.parse(s.value)); } catch { setImages([]); }
+          }
+          if (s.key === "jersey_main_image") setMainImage(s.value);
+        });
+      }
+      setLoadingJersey(false);
+    }
+    load();
+  }, []);
+
+  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploadingJersey(true);
+    const supabase = createClient();
+    const newImages: string[] = [];
+
+    for (const file of Array.from(files)) {
+      if (!file.type.startsWith("image/") || file.size > 5 * 1024 * 1024) continue;
+
+      const ext = file.name.split(".").pop();
+      const fileName = `jersey/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+      const { error } = await supabase.storage.from("Product").upload(fileName, file);
+      if (error) continue;
+
+      const { data } = supabase.storage.from("Product").getPublicUrl(fileName);
+      newImages.push(data.publicUrl);
+    }
+
+    if (newImages.length > 0) {
+      setImages((prev) => [...prev, ...newImages]);
+    }
+
+    setUploadingJersey(false);
+    if (jerseyFileRef.current) jerseyFileRef.current.value = "";
+  }
+
+  function handleRemove(url: string) {
+    setImages(images.filter((img) => img !== url));
+    if (mainImage === url) setMainImage("");
+  }
+
+  async function handleSave() {
+    setSavingJersey(true);
+    setJerseySuccess(false);
+    const supabase = createClient();
+
+    await Promise.all([
+      supabase.from("site_settings").upsert({ key: "jersey_gallery", value: JSON.stringify(images) }, { onConflict: "key" }),
+      supabase.from("site_settings").upsert({ key: "jersey_main_image", value: mainImage || images[0] || "" }, { onConflict: "key" }),
+    ]);
+
+    setSavingJersey(false);
+    setJerseySuccess(true);
+    setTimeout(() => setJerseySuccess(false), 3000);
+  }
+
+  if (loadingJersey) {
+    return (
+      <div className="mb-8 flex items-center justify-center py-8">
+        <Loader2 className="w-6 h-6 text-ice-blue animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="mb-8">
+      <h2 className="font-label font-semibold text-sm uppercase tracking-wider text-muted mb-4 flex items-center gap-2">
+        <Shirt className="w-4 h-4" />
+        Galeri Jersey Kustom
+      </h2>
+
+      {jerseySuccess && (
+        <div className="bg-wa-green/10 border border-wa-green/20 rounded-sm px-4 py-2 text-sm text-wa-green mb-4">
+          Galeri jersey berhasil disimpan!
+        </div>
+      )}
+
+      {/* Image grid */}
+      {images.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-4">
+          {images.map((url, i) => (
+            <div key={i} className="relative aspect-square bg-bg border border-border rounded-sm overflow-hidden group">
+              <NextImage src={url} alt={`Jersey ${i + 1}`} fill className="object-cover" />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                <button
+                  onClick={() => setMainImage(url)}
+                  className={`px-2 py-1 text-[10px] font-label font-bold uppercase rounded-sm cursor-pointer ${mainImage === url ? "bg-ice-blue text-black" : "bg-white/80 text-black hover:bg-white"}`}
+                >
+                  {mainImage === url ? "Utama ✓" : "Set Utama"}
+                </button>
+                <button
+                  onClick={() => handleRemove(url)}
+                  className="w-7 h-7 bg-mmj-red/80 hover:bg-mmj-red rounded-full flex items-center justify-center cursor-pointer"
+                >
+                  <X className="w-4 h-4 text-white" />
+                </button>
+              </div>
+              {mainImage === url && (
+                <span className="absolute bottom-2 left-2 bg-ice-blue/90 text-black text-[10px] font-label font-bold uppercase px-2 py-0.5 rounded-sm">
+                  Utama
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Upload */}
+      <div
+        onClick={() => !uploadingJersey && jerseyFileRef.current?.click()}
+        className="border-2 border-dashed border-border rounded-sm p-6 text-center hover:border-ice-blue/30 cursor-pointer transition-colors mb-2"
+      >
+        {uploadingJersey ? (
+          <div className="flex items-center justify-center gap-2">
+            <Loader2 className="w-5 h-5 text-ice-blue animate-spin" />
+            <span className="text-sm text-muted">Mengupload...</span>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-2">
+            <Upload className="w-5 h-5 text-muted" />
+            <span className="text-sm text-muted">Upload foto jersey</span>
+          </div>
+        )}
+      </div>
+      <p className="text-xs text-muted/70 mb-4">
+        Ukuran rekomendasi: <strong>800 x 800 px</strong> (rasio 1:1) untuk galeri, <strong>1200 x 900 px</strong> (rasio 4:3) untuk gambar utama. Format: JPG, PNG, atau WebP. Maks 5MB.
+      </p>
+
+      <input
+        ref={jerseyFileRef}
+        type="file"
+        accept="image/*"
+        multiple
+        onChange={handleUpload}
+        className="hidden"
+      />
+
+      <div className="flex justify-end">
+        <Button size="sm" onClick={handleSave} disabled={savingJersey}>
+          {savingJersey ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Menyimpan...
+            </>
+          ) : (
+            <>
+              <Save className="w-4 h-4" />
+              Simpan Galeri Jersey
+            </>
+          )}
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 function PageTextEditor() {
   const [texts, setTexts] = useState({
@@ -591,6 +770,9 @@ export default function ContentPage() {
           </div>
         )}
       </div>
+
+      {/* Jersey gallery */}
+      <JerseyGalleryEditor />
 
       {/* Page text */}
       <PageTextEditor />

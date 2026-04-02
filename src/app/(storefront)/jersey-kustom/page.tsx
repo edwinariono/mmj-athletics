@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
+import NextImage from "next/image";
 import { MessageCircle, Paintbrush, Users, Clock, Shirt, Award } from "lucide-react";
+import { buildJerseyEnquiryLink } from "@/lib/whatsapp";
+import { JERSEY_COLORS } from "@/lib/constants";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "Jersey Hoki Es Kustom — Desain Jersey Tim | Custom Ice Hockey Jersey",
@@ -25,8 +29,8 @@ export const metadata: Metadata = {
     canonical: "https://mmjathletics.com/jersey-kustom",
   },
 };
-import { buildJerseyEnquiryLink } from "@/lib/whatsapp";
-import { JERSEY_COLORS } from "@/lib/constants";
+
+export const dynamic = "force-dynamic";
 
 const features = [
   { icon: Paintbrush, text: "Sublimasi kustom penuh" },
@@ -36,7 +40,27 @@ const features = [
   { icon: Clock, text: "Pengerjaan 2-3 minggu" },
 ];
 
-export default function JerseyKustomPage() {
+export default async function JerseyKustomPage() {
+  let mainImage = "";
+  let galleryImages: string[] = [];
+
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("site_settings")
+      .select("key, value")
+      .in("key", ["jersey_main_image", "jersey_gallery"]);
+
+    data?.forEach((s: { key: string; value: string }) => {
+      if (s.key === "jersey_main_image") mainImage = s.value;
+      if (s.key === "jersey_gallery") {
+        try { galleryImages = JSON.parse(s.value); } catch { galleryImages = []; }
+      }
+    });
+  } catch {
+    // Fallback
+  }
+
   return (
     <div className="min-h-screen">
       {/* Hero */}
@@ -46,15 +70,19 @@ export default function JerseyKustomPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             {/* Visual */}
             <div>
-              <div className="aspect-[4/3] bg-bg border border-border clip-corner-lg flex items-center justify-center">
-                <div className="text-center">
-                  <span className="font-heading text-7xl font-bold text-white/5">
-                    JERSEY
-                  </span>
-                  <p className="text-muted text-sm mt-2">
-                    Jersey showcase preview
-                  </p>
-                </div>
+              <div className="aspect-[4/3] bg-bg border border-border clip-corner-lg flex items-center justify-center relative overflow-hidden">
+                {mainImage ? (
+                  <NextImage src={mainImage} alt="Jersey kustom" fill className="object-cover" priority />
+                ) : (
+                  <div className="text-center">
+                    <span className="font-heading text-7xl font-bold text-white/5">
+                      JERSEY
+                    </span>
+                    <p className="text-muted text-sm mt-2">
+                      Jersey showcase preview
+                    </p>
+                  </div>
+                )}
               </div>
               {/* Color swatches */}
               <div className="flex gap-3 mt-6">
@@ -119,16 +147,25 @@ export default function JerseyKustomPage() {
           </p>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div
-                key={i}
-                className="aspect-square bg-surface border border-border clip-corner-md flex items-center justify-center hover:border-ice-blue/30 transition-colors"
-              >
-                <span className="font-heading text-xl font-bold text-white/5">
-                  Jersey {i + 1}
-                </span>
-              </div>
-            ))}
+            {galleryImages.length > 0
+              ? galleryImages.map((url, i) => (
+                  <div
+                    key={i}
+                    className="aspect-square bg-surface border border-border clip-corner-md overflow-hidden relative hover:border-ice-blue/30 transition-colors"
+                  >
+                    <NextImage src={url} alt={`Jersey ${i + 1}`} fill className="object-cover" />
+                  </div>
+                ))
+              : Array.from({ length: 6 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="aspect-square bg-surface border border-border clip-corner-md flex items-center justify-center hover:border-ice-blue/30 transition-colors"
+                  >
+                    <span className="font-heading text-xl font-bold text-white/5">
+                      Jersey {i + 1}
+                    </span>
+                  </div>
+                ))}
           </div>
         </div>
       </section>
