@@ -11,11 +11,12 @@ export const dynamic = "force-dynamic";
 export default async function HomePage() {
   let heroBanner = null;
   let promoBanners: any[] = [];
+  const texts: Record<string, string> = {};
 
   try {
     const supabase = await createClient();
 
-    const [heroResult, promoResult] = await Promise.all([
+    const [heroResult, promoResult, settingsResult] = await Promise.all([
       supabase
         .from("banners")
         .select("*")
@@ -30,22 +31,37 @@ export default async function HomePage() {
         .eq("position", "promo")
         .eq("is_active", true)
         .order("created_at", { ascending: false }),
+      supabase.from("site_settings").select("key, value"),
     ]);
 
     heroBanner = heroResult.data;
     promoBanners = promoResult.data || [];
+    settingsResult.data?.forEach((s: { key: string; value: string }) => {
+      texts[s.key] = s.value;
+    });
   } catch {
     // Fallback to static content
   }
 
   return (
     <>
-      <HeroSection banner={heroBanner} />
+      <HeroSection
+        banner={heroBanner}
+        tagline={texts.hero_tagline}
+        headline={texts.hero_headline}
+        description={texts.hero_description}
+      />
       <CategoryCards />
       {promoBanners.length > 0 && <PromoBanner banners={promoBanners} />}
-      <JerseyPreview />
+      <JerseyPreview
+        headline={texts.jersey_headline}
+        description={texts.jersey_description}
+      />
       <FeaturedProducts />
-      <WaCTABanner />
+      <WaCTABanner
+        headline={texts.wa_cta_headline}
+        description={texts.wa_cta_description}
+      />
     </>
   );
 }

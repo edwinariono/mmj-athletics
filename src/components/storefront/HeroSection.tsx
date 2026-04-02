@@ -6,9 +6,12 @@ import type { Banner } from "@/lib/types";
 
 interface HeroSectionProps {
   banner?: Banner | null;
+  tagline?: string;
+  headline?: string;
+  description?: string;
 }
 
-export function HeroSection({ banner }: HeroSectionProps) {
+export function HeroSection({ banner, tagline, headline, description }: HeroSectionProps) {
   return (
     <section className="relative overflow-hidden bg-bg">
       {/* Background image from banner */}
@@ -36,21 +39,26 @@ export function HeroSection({ banner }: HeroSectionProps) {
           <div className="inline-flex items-center gap-2 bg-ice-blue/10 border border-ice-blue/20 px-3 py-1 mb-6 clip-corner-sm">
             <span className="w-1.5 h-1.5 bg-ice-blue rounded-full animate-pulse" />
             <span className="text-ice-blue font-label text-xs font-semibold uppercase tracking-wider">
-              {banner?.title || "Katalog Musim 2026"}
+              {tagline || banner?.title || "Katalog Musim 2026"}
             </span>
           </div>
 
           {/* Headline */}
           <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-bold uppercase leading-[1.1] mb-6">
-            Lengkapi.{" "}
-            <span className="text-ice-blue">Kuasai.</span>
-            <br />
-            Arena Es.
+            {headline || (
+              <>
+                Lengkapi.{" "}
+                <span className="text-ice-blue">Kuasai.</span>
+                <br />
+                Arena Es.
+              </>
+            )}
           </h1>
 
           {/* Description */}
           <p className="text-muted text-base sm:text-lg leading-relaxed mb-8 max-w-lg">
-            {banner?.subtitle ||
+            {description ||
+              banner?.subtitle ||
               "Peralatan hoki es premium dari brand terpercaya dunia. Jersey kustom untuk tim Anda."}
           </p>
 

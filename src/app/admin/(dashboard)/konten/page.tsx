@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
 import NextImage from "next/image";
 import {
   Save,
@@ -40,6 +41,162 @@ const emptyForm: BannerFormData = {
   position: "hero",
   is_active: true,
 };
+
+function PageTextEditor() {
+  const [texts, setTexts] = useState({
+    hero_tagline: "",
+    hero_headline: "",
+    hero_description: "",
+    jersey_headline: "",
+    jersey_description: "",
+    wa_cta_headline: "",
+    wa_cta_description: "",
+  });
+  const [loadingTexts, setLoadingTexts] = useState(true);
+  const [savingTexts, setSavingTexts] = useState(false);
+  const [textSuccess, setTextSuccess] = useState(false);
+
+  useEffect(() => {
+    async function load() {
+      const supabase = createClient();
+      const { data } = await supabase.from("site_settings").select("key, value");
+      if (data) {
+        const settings: Record<string, string> = {};
+        data.forEach((s: { key: string; value: string }) => {
+          settings[s.key] = s.value;
+        });
+        setTexts({
+          hero_tagline: settings.hero_tagline || "Katalog Musim 2026",
+          hero_headline: settings.hero_headline || "Lengkapi. Kuasai. Arena Es.",
+          hero_description: settings.hero_description || "Peralatan hoki es premium dari brand terpercaya dunia. Jersey kustom untuk tim Anda.",
+          jersey_headline: settings.jersey_headline || "Bangun Identitas Tim Anda",
+          jersey_description: settings.jersey_description || "Jersey tim kustom dengan sublimasi berkualitas tinggi.",
+          wa_cta_headline: settings.wa_cta_headline || "Tertarik? Langsung Chat Kami!",
+          wa_cta_description: settings.wa_cta_description || "Tanya stok, harga, atau konsultasi peralatan langsung ke tim kami via WhatsApp",
+        });
+      }
+      setLoadingTexts(false);
+    }
+    load();
+  }, []);
+
+  async function handleSaveTexts() {
+    setSavingTexts(true);
+    setTextSuccess(false);
+    const supabase = createClient();
+
+    for (const [key, value] of Object.entries(texts)) {
+      await supabase
+        .from("site_settings")
+        .upsert({ key, value }, { onConflict: "key" });
+    }
+
+    setSavingTexts(false);
+    setTextSuccess(true);
+    setTimeout(() => setTextSuccess(false), 3000);
+  }
+
+  if (loadingTexts) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="w-6 h-6 text-ice-blue animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <h2 className="font-label font-semibold text-sm uppercase tracking-wider text-muted mb-4 flex items-center gap-2">
+        <Type className="w-4 h-4" />
+        Teks Halaman
+      </h2>
+
+      {textSuccess && (
+        <div className="bg-wa-green/10 border border-wa-green/20 rounded-sm px-4 py-2 text-sm text-wa-green mb-4">
+          Teks berhasil disimpan!
+        </div>
+      )}
+
+      <div className="space-y-6">
+        {/* Hero section texts */}
+        <div className="bg-admin-surface border border-border rounded-sm p-6 space-y-4">
+          <h3 className="text-sm font-semibold text-ice-blue">Hero Section</h3>
+          <Input
+            label="Tagline Hero"
+            value={texts.hero_tagline}
+            onChange={(e) => setTexts({ ...texts, hero_tagline: e.target.value })}
+          />
+          <Input
+            label="Headline Hero"
+            value={texts.hero_headline}
+            onChange={(e) => setTexts({ ...texts, hero_headline: e.target.value })}
+          />
+          <div className="space-y-1.5">
+            <label className="block text-sm font-label font-semibold uppercase tracking-wider text-muted">
+              Deskripsi Hero
+            </label>
+            <textarea
+              className="w-full bg-surface border border-border rounded-sm px-3 py-2.5 text-sm text-white min-h-[80px] focus:outline-none focus:border-ice-blue/50 focus:ring-1 focus:ring-ice-blue/20"
+              value={texts.hero_description}
+              onChange={(e) => setTexts({ ...texts, hero_description: e.target.value })}
+            />
+          </div>
+        </div>
+
+        {/* Jersey section texts */}
+        <div className="bg-admin-surface border border-border rounded-sm p-6 space-y-4">
+          <h3 className="text-sm font-semibold text-mmj-red">Jersey Kustom Section</h3>
+          <Input
+            label="Headline Jersey"
+            value={texts.jersey_headline}
+            onChange={(e) => setTexts({ ...texts, jersey_headline: e.target.value })}
+          />
+          <div className="space-y-1.5">
+            <label className="block text-sm font-label font-semibold uppercase tracking-wider text-muted">
+              Deskripsi Jersey
+            </label>
+            <textarea
+              className="w-full bg-surface border border-border rounded-sm px-3 py-2.5 text-sm text-white min-h-[80px] focus:outline-none focus:border-ice-blue/50 focus:ring-1 focus:ring-ice-blue/20"
+              value={texts.jersey_description}
+              onChange={(e) => setTexts({ ...texts, jersey_description: e.target.value })}
+            />
+          </div>
+        </div>
+
+        {/* WA CTA section texts */}
+        <div className="bg-admin-surface border border-border rounded-sm p-6 space-y-4">
+          <h3 className="text-sm font-semibold text-wa-green">WhatsApp CTA Banner</h3>
+          <Input
+            label="Headline CTA"
+            value={texts.wa_cta_headline}
+            onChange={(e) => setTexts({ ...texts, wa_cta_headline: e.target.value })}
+          />
+          <Input
+            label="Deskripsi CTA"
+            value={texts.wa_cta_description}
+            onChange={(e) => setTexts({ ...texts, wa_cta_description: e.target.value })}
+          />
+        </div>
+
+        <div className="flex justify-end">
+          <Button size="sm" onClick={handleSaveTexts} disabled={savingTexts}>
+            {savingTexts ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Menyimpan...
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4" />
+                Simpan Semua Teks
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function ContentPage() {
   const [banners, setBanners] = useState<Banner[]>([]);
@@ -436,34 +593,7 @@ export default function ContentPage() {
       </div>
 
       {/* Page text */}
-      <div>
-        <h2 className="font-label font-semibold text-sm uppercase tracking-wider text-muted mb-4 flex items-center gap-2">
-          <Type className="w-4 h-4" />
-          Teks Halaman
-        </h2>
-        <div className="bg-admin-surface border border-border rounded-sm p-6 space-y-4">
-          <Input label="Tagline Hero" defaultValue="Katalog Musim 2026" />
-          <Input
-            label="Headline Hero"
-            defaultValue="Lengkapi. Kuasai. Arena Es."
-          />
-          <div className="space-y-1.5">
-            <label className="block text-sm font-label font-semibold uppercase tracking-wider text-muted">
-              Deskripsi Hero
-            </label>
-            <textarea
-              className="w-full bg-surface border border-border rounded-sm px-3 py-2.5 text-sm text-white min-h-[80px] focus:outline-none focus:border-ice-blue/50 focus:ring-1 focus:ring-ice-blue/20"
-              defaultValue="Peralatan hoki es premium dari brand terpercaya dunia. Dealer resmi Bauer & CCM di Indonesia."
-            />
-          </div>
-          <div className="flex justify-end">
-            <Button size="sm">
-              <Save className="w-4 h-4" />
-              Simpan
-            </Button>
-          </div>
-        </div>
-      </div>
+      <PageTextEditor />
     </div>
   );
 }

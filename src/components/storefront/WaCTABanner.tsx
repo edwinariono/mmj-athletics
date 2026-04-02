@@ -1,16 +1,21 @@
 import { MessageCircle } from "lucide-react";
 import { buildGeneralEnquiryLink } from "@/lib/whatsapp";
 
-export function WaCTABanner() {
+interface WaCTABannerProps {
+  headline?: string;
+  description?: string;
+}
+
+export function WaCTABanner({ headline, description }: WaCTABannerProps) {
   return (
     <section className="bg-wa-green py-12 sm:py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
         <h2 className="font-heading text-2xl sm:text-3xl font-bold uppercase tracking-wider text-white mb-3">
-          Tertarik? Langsung Chat Kami!
+          {headline || "Tertarik? Langsung Chat Kami!"}
         </h2>
         <p className="text-white/80 text-sm mb-8 max-w-md mx-auto">
-          Tanya stok, harga, atau konsultasi peralatan langsung ke tim kami via
-          WhatsApp
+          {description ||
+            "Tanya stok, harga, atau konsultasi peralatan langsung ke tim kami via WhatsApp"}
         </p>
         <a
           href={buildGeneralEnquiryLink()}

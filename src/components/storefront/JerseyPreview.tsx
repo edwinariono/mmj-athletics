@@ -3,7 +3,12 @@ import { MessageCircle, ChevronRight, Paintbrush, Users, Clock } from "lucide-re
 import { buildJerseyEnquiryLink } from "@/lib/whatsapp";
 import { JERSEY_COLORS } from "@/lib/constants";
 
-export function JerseyPreview() {
+interface JerseyPreviewProps {
+  headline?: string;
+  description?: string;
+}
+
+export function JerseyPreview({ headline, description }: JerseyPreviewProps) {
   return (
     <section className="py-16 sm:py-20 bg-surface border-y border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -36,11 +41,11 @@ export function JerseyPreview() {
               MMJ Athletics Custom
             </span>
             <h2 className="font-heading text-2xl sm:text-3xl font-bold uppercase tracking-wider mb-4">
-              Bangun Identitas Tim Anda
+              {headline || "Bangun Identitas Tim Anda"}
             </h2>
             <p className="text-muted text-sm leading-relaxed mb-6">
-              Jersey tim kustom dengan sublimasi penuh. Desain sesuai identitas tim
-              Anda — mulai dari warna, logo, hingga detail terkecil.
+              {description ||
+                "Jersey tim kustom dengan sublimasi penuh. Desain sesuai identitas tim Anda — mulai dari warna, logo, hingga detail terkecil."}
             </p>
 
             <ul className="space-y-3 mb-8">
