@@ -51,7 +51,7 @@ export function HeroSection({ banner }: HeroSectionProps) {
           {/* Description */}
           <p className="text-muted text-base sm:text-lg leading-relaxed mb-8 max-w-lg">
             {banner?.subtitle ||
-              "Peralatan hoki es premium dari brand terpercaya dunia. Dealer resmi Bauer & CCM di Indonesia. Jersey kustom untuk tim Anda."}
+              "Peralatan hoki es premium dari brand terpercaya dunia. Jersey kustom untuk tim Anda."}
           </p>
 
           {/* CTAs */}

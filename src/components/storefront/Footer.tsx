@@ -15,7 +15,6 @@ export function Footer() {
             </h3>
             <p className="text-sm text-muted leading-relaxed mb-4">
               Hockey Outfitters — Toko peralatan hoki es terlengkap di Indonesia.
-              Dealer resmi Bauer & CCM.
             </p>
             <div className="flex items-center gap-2 text-wa-green">
               <Phone className="w-4 h-4" />
